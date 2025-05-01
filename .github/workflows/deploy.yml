@@ -1,0 +1,36 @@
+name: Deploy and Migrate Laravel App
+
+on:
+  push:
+    branches:
+      - main  # Adjust if you use a different branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repo
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Set up PHP
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'  # Use the version that works for your app
+
+      # Step 3: Install dependencies (Composer)
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader
+
+      # Step 4: Run migrations
+      - name: Run migrations
+        env:
+          DB_CONNECTION: pgsql  # or 'pgsql' if using PostgreSQL
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: php artisan migrate --force
